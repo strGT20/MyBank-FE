@@ -26,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import androidx.navigation.compose.rememberNavController
 import com.example.mybank.models.MenuFeature
 import com.example.mybank.models.PromoList
 import com.example.mybank.ui.components.*
