@@ -1,15 +1,15 @@
 package com.example.mybank.ui.screens
 
+import android.app.Activity
 import com.example.mybank.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.transformable
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,27 +18,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.example.mybank.models.MenuFeature
-import com.example.mybank.ui.components.FeatureItem
-import com.example.mybank.ui.components.MyBankNavbar
-import com.example.mybank.ui.components.MyBankPromoCard
-import com.example.mybank.ui.components.ResizableCard
-import com.example.mybank.ui.theme.Maroon
-import com.example.mybank.ui.theme.MyBankTheme
-import com.example.mybank.ui.theme.OnyxMain
-import com.example.mybank.ui.theme.PureWhite
-import com.example.mybank.ui.theme.RedMain
-import com.example.mybank.ui.theme.SubtleText
+import com.example.mybank.models.PromoList
+import com.example.mybank.ui.components.*
+import com.example.mybank.ui.theme.*
 
 // 1. Simulasi Data dari Backend / AI Recommendation Engine
 // (Nanti ini diambil dari ViewModel)
@@ -72,9 +64,46 @@ val favoriteMenus = allMyBankFeatures.filter { it.id in favoriteIds }
 // 3. Sisanya otomatis masuk ke "Menu Lainnya"
 val otherMenus = allMyBankFeatures.filterNot { it.id in favoriteIds }
 
+val promoList = listOf(
+    PromoList(
+        id = "p1",
+        title = "Terbangkan Penatmu, Andi!",
+        description = "Tiket SAT Airways diskon up to 50%",
+        hashtag = "#OnlyForYou",
+        imageRes = R.drawable.img_flight_promo
+    ),
+    PromoList(
+        id = "p2",
+        title = "Waktunya Kopi Sore, Andi!",
+        description = "Diskon spesial 30% di seluruh outlet",
+        hashtag = "#FlashSale",
+        imageRes = R.drawable.img_promo_coffee
+    ),
+    PromoList(
+        id = "p3",
+        title = "Burger Streak Spesial",
+        description = "Beli 1 Gratis 1 khusus pengguna MyBank",
+        hashtag = "#WeekendPromo",
+        imageRes = R.drawable.img_flight_promo
+    )
+)
+
 @Composable
-fun HomeScreen() {
-    var isAiActive by remember { mutableStateOf(true) } // AI state
+fun HomeScreen(
+    onNavigateToPromo: () -> Unit = {}
+) {
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        // Gunakan LaunchedEffect(Unit) agar dieksekusi sekali saja saat screen aktif
+        LaunchedEffect(Unit) {
+            val window = (view.context as Activity).window
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+        }
+    }
+
+    //Switch on of area
+    var isAiActive by remember { mutableStateOf(false) } // AI state
+    var isBalanceVisible by remember { mutableStateOf(true) }
 
     Scaffold(
         floatingActionButton = {
@@ -114,7 +143,7 @@ fun HomeScreen() {
             Column(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
             ) {
-                // --- 1. SEARCH BAR & CS BUTTON ---
+                //1. SEARCH BAR & CS BUTTON
                 var searchQuery by remember { mutableStateOf("") }
 
                 Row(
@@ -186,7 +215,7 @@ fun HomeScreen() {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // 2. Greeting
+                // 2. Greeting area
                 Text("Selamat pagi,", style = MaterialTheme.typography.bodySmall, color = PureWhite)
                 Text("Andi Saputra", style = MaterialTheme.typography.titleMedium, color = PureWhite)
 
@@ -203,7 +232,6 @@ fun HomeScreen() {
                     containerColor = Maroon
                 ) {
                     Column(
-                        // Padding atas (top) dibuat lebih kecil dari padding bawah (bottom)
                         modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 0.dp, bottom = 8.dp)
                     ) {
                         Text(
@@ -218,18 +246,23 @@ fun HomeScreen() {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            // 1. Teks Saldo Dinamis
                             Text(
-                                text = "Rp12.500.000,00",
+                                text = if (isBalanceVisible) "Rp12.500.000,00" else "Rp************",
                                 style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
                                 color = PureWhite
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_eye_on20dp), // Ganti dengan nama ikon matamu
+                                painter = painterResource(
+                                    id = if (isBalanceVisible) R.drawable.ic_eye_on20dp else R.drawable.ic_eye_off20dp
+                                ),
                                 contentDescription = "Toggle Saldo",
                                 tint = PureWhite,
-                                modifier = Modifier.size(20.dp)
-                            )
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .clickable { isBalanceVisible = !isBalanceVisible }                            )
                         }
                     }
                 }
@@ -272,8 +305,8 @@ fun HomeScreen() {
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = "Atur Menu",
-                                        style = MaterialTheme.typography.labelMedium, // Gunakan labelSmall agar tidak kebesaran
-                                        color = Maroon // Warna teks harus senada dengan ikon
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = Maroon
                                     )
                                 }
                             }
@@ -281,7 +314,6 @@ fun HomeScreen() {
 
                         // KUNCI: Logika Tampilan Isi Card
                         if (isAiActive && dynamicMenus.isNotEmpty()) {
-                            // Tampilkan Grid Menu
                             Spacer(modifier = Modifier.height(16.dp))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -306,67 +338,73 @@ fun HomeScreen() {
 
             Spacer(modifier = Modifier.height(2.dp))
 
+// WHITE ZONE (Other menu, promos, etc.)
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
                 color = PureWhite
             ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text("Menu Lainnya", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(16.dp))
+                // 1. KONTAINER LUAR: Hanya pakai padding vertikal atas-bawah.
+                Column(modifier = Modifier.padding(vertical = 24.dp)) {
 
-                    otherMenus.chunked(4).forEach { rowItems ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            rowItems.forEach { menu ->
-                                FeatureItem(label = menu.title, iconRes = menu.iconRes)
+                    // 2. KONTAINER DALAM: Membungkus Menu Lainnya & Header Promo.
+                    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                        Text("Menu Lainnya", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Grid Menu Lainnya
+                        otherMenus.chunked(4).forEach { rowItems ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                rowItems.forEach { menu ->
+                                    FeatureItem(label = menu.title, iconRes = menu.iconRes)
+                                }
+                                // Menjaga grid tetap rata kiri-kanan jika baris terakhir kurang dari 4 item
+                                repeat(4 - rowItems.size) { Spacer(modifier = Modifier.width(72.dp)) }
                             }
-                            repeat(4 - rowItems.size) { Spacer(modifier = Modifier.width(72.dp)) }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Header Promo
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Promo untuk Anda", style = MaterialTheme.typography.titleMedium)
+                            Text("Lihat semua",
+                                color = RedMain,
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.clickable { onNavigateToPromo() }
+                            )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Promo untuk Anda", style = MaterialTheme.typography.titleMedium)
-                        Text("Lihat semua", color = RedMain, style = MaterialTheme.typography.labelSmall)
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Horizontal Scroll
+                    // 3. HORIZONTAL SCROLL
                     LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(end = 24.dp)
+                        contentPadding = PaddingValues(horizontal = 24.dp)
                     ) {
-                        items(2) { // Ganti dengan daftar promo sungguhan nanti
+                        items(promoList) { promo ->
                             MyBankPromoCard(
-                                title = "Terbangkan Penatmu, Andi!",
-                                description = "Tiket SAT Airways diskon up to 50%",
-                                hashtag = "#OnlyForYou",
-                                imageRes = R.drawable.img_flight_promo, // Siapkan gambarnya
-                                // KUNCI: Ukuran untuk LazyRow Beranda
-                                modifier = Modifier.width(280.dp).height(140.dp)
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            // Contoh promo kedua
-                            MyBankPromoCard(
-                                title = "Waktunya Kopi Sore, Andi!",
-                                description = "Diskon spesial 30%",
-                                hashtag = "#OnlyForYou",
-                                imageRes = R.drawable.img_promo_coffee,
+                                title = promo.title,
+                                description = promo.description,
+                                hashtag = promo.hashtag,
+                                imageRes = promo.imageRes,
                                 modifier = Modifier.width(280.dp).height(140.dp)
                             )
                         }
                     }
+
+                    // Ruang kosong tambahan di dasar layar agar card promo tidak
+                    // tertutup oleh bayangan FloatingActionButton (QRIS) atau Bottom Bar
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
         }
@@ -376,7 +414,6 @@ fun HomeScreen() {
 @Preview
 @Composable
 fun HomePreview() {
-    val navController = rememberNavController()
     MyBankTheme {
         HomeScreen()
     }
