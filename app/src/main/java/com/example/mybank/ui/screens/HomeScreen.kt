@@ -26,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import androidx.navigation.compose.rememberNavController
 import com.example.mybank.models.MenuFeature
 import com.example.mybank.models.PromoList
 import com.example.mybank.ui.components.*
@@ -102,7 +101,7 @@ fun HomeScreen(
     }
 
     //Switch on of area
-    var isAiActive by remember { mutableStateOf(false) } // AI state
+    var isAiActive by remember { mutableStateOf(true) } // AI state
     var isBalanceVisible by remember { mutableStateOf(true) }
 
     Scaffold(
