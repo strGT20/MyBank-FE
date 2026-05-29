@@ -5,6 +5,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import com.example.mybank.data.api.services.*
+import com.example.mybank.data.models.PersonalizationState
 
 object ApiConfig {
 
@@ -27,5 +28,9 @@ object ApiConfig {
 
     val authService: AuthApiService by lazy {
         getRetrofit().create(AuthApiService::class.java)
+    }
+
+    val userService: UserApiService by lazy {
+        getRetrofit().create(UserApiService::class.java)
     }
 }

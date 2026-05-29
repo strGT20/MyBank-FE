@@ -21,6 +21,7 @@ import com.example.mybank.ui.screens.RegisterScreen
 import com.example.mybank.ui.theme.MyBankTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mybank.ui.viewmodels.AuthViewModel
+import com.example.mybank.ui.viewmodels.HomeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     val authViewModel: AuthViewModel = viewModel()
+                    val homeViewModel: HomeViewModel = viewModel()
 
                     NavHost(
                         navController = navController,
@@ -101,6 +103,9 @@ class MainActivity : ComponentActivity() {
 
                         composable("home") {
                             HomeScreen(
+                                navController = navController,
+                                viewModel = homeViewModel,
+                                // onNavigateToLogin = ,
                                 onNavigateToPromo = {
                                     navController.navigate("promo") {
                                         launchSingleTop = true

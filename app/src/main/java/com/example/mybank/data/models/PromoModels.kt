@@ -1,4 +1,7 @@
-package com.example.mybank.models
+package com.example.mybank.data.models
+
+class PromoModels {
+}
 
 data class PromoList(
     val id: String,          // Penting untuk key di LazyColumn/Row
