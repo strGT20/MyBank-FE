@@ -1,7 +1,6 @@
 package com.example.mybank.ui.screens
 
 import android.app.Activity
-import android.app.ProgressDialog.show
 import androidx.activity.compose.BackHandler
 import com.example.mybank.R
 import androidx.compose.foundation.background
@@ -30,11 +29,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mybank.models.MenuFeature
-import com.example.mybank.models.PromoList
+import com.example.mybank.data.models.MenuFeature
+import com.example.mybank.data.models.PromoList
 import com.example.mybank.ui.components.*
 import com.example.mybank.ui.theme.*
+import com.example.mybank.ui.viewmodels.HomeViewModel
 
 // 1. Simulasi Data dari Backend / AI Recommendation Engine
 // (Nanti ini diambil dari ViewModel)
@@ -96,6 +97,7 @@ val promoList = listOf(
 fun HomeScreen(
     navController: NavController,
 //    onNavigateToLogin: () -> Unit,
+    viewModel: HomeViewModel,
     onNavigateToPromo: () -> Unit = {}
 ) {
     val view = LocalView.current
@@ -109,7 +111,9 @@ fun HomeScreen(
 
     val context = LocalContext.current
     val activity = (context as? Activity)
+
     var showLogoutDialog by remember { mutableStateOf(false) }
+    val showConsentDialog by viewModel.showConsentDialog.collectAsState()
 
     //Switch on of area
     var isAiActive by remember { mutableStateOf(true) } // AI state
@@ -465,6 +469,16 @@ fun HomeScreen(
                 }
             }
         }
+
+        PersonalizationConsentDialog(
+            showDialog = showConsentDialog,
+            onAllow = {
+                viewModel.submitPersonalizationConsent(true)
+            },
+            onDecline = {
+                viewModel.submitPersonalizationConsent(false)
+            }
+        )
     }
 }
 

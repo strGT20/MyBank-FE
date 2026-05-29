@@ -1,4 +1,7 @@
-package com.example.mybank.models
+package com.example.mybank.data.models
+
+class MenuModels {
+}
 
 data class MenuFeature(
     val id: String,
