@@ -32,4 +32,12 @@ class UserPreferencesManager(context: Context) {
     var hasAnsweredAiConsent: Boolean
         get() = prefs.getBoolean(KEY_HAS_ANSWERED_CONSENT, false)
         set(value) = prefs.edit().putBoolean(KEY_HAS_ANSWERED_CONSENT, value).apply()
+
+    // Menghapus data sesi
+    fun clearSession() {
+        prefs.edit()
+            .remove(KEY_ACCESS_TOKEN)
+            .remove(KEY_USER_NAME)
+            .apply()
+    }
 }

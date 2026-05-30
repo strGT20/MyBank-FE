@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-// Menggunakan AndroidViewModel agar bisa mengakses 'application context' untuk SharedPreferences
 class PersonalizationViewModel(application: Application) : AndroidViewModel(application) {
 
     private val prefsManager = UserPreferencesManager(application)
@@ -23,27 +22,29 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
     private val _showConsentDialog = MutableStateFlow(!prefsManager.hasAnsweredAiConsent)
     val showConsentDialog: StateFlow<Boolean> = _showConsentDialog
 
-    // Fungsi untuk memperbarui status AI (dipanggil dari Pop-up maupun halaman Settings)
+    // Fungsi untuk memperbarui status AI (dipanggil dari Pop-up maupun layar Pengaturan)
     fun updatePersonalizationStatus(isEnabled: Boolean) {
         viewModelScope.launch {
             // Update UI secara instan agar terasa responsif
             _isAiActive.value = isEnabled
             _showConsentDialog.value = false
 
-            // 1. Simpan ke penyimpanan lokal HP
+            // Simpan ke penyimpanan lokal HP
             prefsManager.isAiPersonalizationEnabled = isEnabled
             prefsManager.hasAnsweredAiConsent = true
 
             try {
-                // 2. Tembak ke API Backend
+                // Tembak ke API Backend
                 val request = PersonalizationState(enabled = isEnabled)
                 val response = ApiConfig.userService.setPersonalization(request)
 
-                if (!response.isSuccessful) {
-                    // Jika API gagal, idealnya lakukan rollback atau tampilkan error
+                if (response.isSuccessful) {
+                    android.util.Log.d("API_CONSENT", "Data AI berhasil dikirim: $isEnabled")
+                } else {
+                    android.util.Log.e("API_CONSENT", "Server Error: ${response.code()}")
                 }
             } catch (e: Exception) {
-                // Handle jika tidak ada jaringan internet
+                android.util.Log.e("API_CONSENT", "Koneksi Gagal: ${e.message}")
             }
         }
     }

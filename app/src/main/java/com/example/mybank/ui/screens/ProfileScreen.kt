@@ -3,6 +3,7 @@ package com.example.mybank.ui.screens
 import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,22 +20,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mybank.R
 import com.example.mybank.ui.components.MyBankNavbar
 import com.example.mybank.ui.theme.*
+import com.example.mybank.ui.viewmodels.HomeViewModel
 import com.example.mybank.ui.viewmodels.PersonalizationViewModel
 
 @Composable
 fun ProfileScreen(
     // Parameter navigasi bisa ditambahkan nanti di sini
     navController: NavController,
-    personalizationViewModel: PersonalizationViewModel
+    personalizationViewModel: PersonalizationViewModel,
+
 ) {
     // 1. KONTROL STATUS BAR: Memastikan teks status bar berwarna gelap di atas background putih
     val view = LocalView.current
@@ -48,9 +49,36 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        // Untuk sementara kita pasang Navbar statis agar tampilannya utuh seperti desain
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { /* Buka QRIS */ },
+                shape = CircleShape,
+                containerColor = Maroon,
+                contentColor = PureWhite,
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp), // 1. Tambah Shadow
+                modifier = Modifier
+                    .size(64.dp)
+                    .offset(y = 64.dp)
+                    .border(width = 4.dp, color = PureWhite, shape = CircleShape) // 2. Tambah Border Putih
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_qris), // Pastikan icon ada
+                    contentDescription = "QRIS",
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.Center,
         bottomBar = {
-            MyBankNavbar(currentScreen = "Profil", onTabSelected = {})
+            MyBankNavbar(
+                currentScreen = "profile",
+                onTabSelected = { route ->
+                    navController.navigate(route) {
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                })
         }
     ) { innerPadding ->
         Column(
@@ -212,7 +240,7 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.width(16.dp))
 
-                        // Switch Warna Merah Kustom
+                        // SWITCH ON/OFF PERSONALISASI
                         Switch(
                             checked = isAiActive,
                             onCheckedChange = { newValue ->
@@ -311,10 +339,10 @@ fun SettingsMenuItem(
     }
 }
 
-@Preview
-@Composable
-fun ProfileScreenPreview() {
-    MyBankTheme {
-//        ProfileScreen()
-    }
-}
+//@Preview
+//@Composable
+//fun ProfileScreenPreview() {
+//    MyBankTheme {
+////        ProfileScreen()
+//    }
+//}
